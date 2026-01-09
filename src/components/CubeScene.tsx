@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import PointerInteraction from './PointerInteraction'
+import Rotator from './Rotator'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
 
@@ -78,10 +80,7 @@ export default function CubeScene({ timeLimitMinutes, running, onSolved, onTimeo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, timeLimitMinutes])
 
-  // simple rotate animation loop
-  useFrame(() => {
-    if (groupRef.current) groupRef.current.rotation.y += 0.001
-  })
+  // rotator moved into a component mounted inside Canvas (see Rotator)
 
   // Moves: we implement U, Ui, R, Ri, F, Fi for now
   const isAnimating = useRef(false)
@@ -393,6 +392,13 @@ export default function CubeScene({ timeLimitMinutes, running, onSolved, onTimeo
 
       return null
     }
+
+    function Rotator({ groupRef }: { groupRef: React.RefObject<THREE.Group> }) {
+      useFrame(() => {
+        if (groupRef.current) groupRef.current.rotation.y += 0.001
+      })
+      return null
+    }
   return (
     <div className="scene-shell">
       <Canvas camera={{ position: [4, 4, 6] }}>
@@ -406,6 +412,7 @@ export default function CubeScene({ timeLimitMinutes, running, onSolved, onTimeo
           </mesh>
           {renderFaceStickers()}
           <PointerInteraction groupRef={groupRef} applyMove={applyMove} />
+          <Rotator groupRef={groupRef} />
         </group>
         <OrbitControls enablePan={false} />
       </Canvas>
